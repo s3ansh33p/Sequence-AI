@@ -1,5 +1,6 @@
 // imports
 const { initializeGame, dealCards, drawCard, playCard, nextPlayer, getValidMoves, drawGame } = require("./game.js");
+const { scoreBoard } = require("./score.js");
 
 // mock game
 async function mockGame() {
@@ -9,8 +10,13 @@ async function mockGame() {
     while (game.winner === null) {
         await doMockTurn(game);
         // wait 1 second
-        // await new Promise(resolve => setTimeout(resolve, 100));
         drawGame(game);
+        // score the board for both players
+        let p1Score = scoreBoard(game, "player1");
+        let p2Score = scoreBoard(game, "player2");
+        console.log("Player 1 Score: " + p1Score);
+        console.log("Player 2 Score: " + p2Score);
+        // await new Promise(resolve => setTimeout(resolve, 200));
     }
 
 }
