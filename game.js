@@ -88,6 +88,7 @@ function createDeck() {
             // deck.push(suits[i] + cards[j]);
             // use valueMap
             deck.push(valueMap[suits[i] + cards[j]]);
+            deck.push(valueMap[suits[i] + cards[j]]);
         }
     }
     return deck;
@@ -383,6 +384,9 @@ export function drawGame(game) {
     }
     // draw key at bottom
     console.log("\x1b[34m" + "Player 1" + "\x1b[0m" + " = Blue");
+    // show hand
+    console.log(game.player1.hand);
     console.log("\x1b[31m" + "Player 2" + "\x1b[0m" + " = Red");
+    console.log(game.player2.hand);
     console.log();
 }

@@ -132,7 +132,7 @@ function getObservationTensor(game) {
     }
 
     let tensor2 = tf.tensor2d(observation[1], [1, 36]);
-    console.log(tensor1.shape, tensor2.shape);
+    // console.log(tensor1.shape, tensor2.shape);
 
     return [tensor1, tensor2];
 }
@@ -143,7 +143,7 @@ function getActionTensor(action) {
 }
 
 function getRewardTensor(reward) {
-    let tensor = tf.tensor2d([reward]);
+    let tensor = tf.tensor2d([reward], [1, 1]);
     return tensor;
 }
 
@@ -188,18 +188,35 @@ game.currentPlayer = "player1";
 while (game.winner === null) {
     // get prediction
     let prediction = getPrediction(game);
-    console.log(prediction);
+    // console.log(prediction);
     // get action
     let action = getActionFromPrediction(prediction);
-    console.log(action);
+    // console.log(action);
     // if no valid moves, then game ends in tie
-    if (action === null) {
+    if (action === -1) {
         game.winner = "Tie";
     } else {
         // do move
         let validMoves = getValidMoves(game);
+        
+        // [!] THIS WILL NEED TO BE REVISED!!!
+        if (action >= validMoves.length) {
+            console.log("WARNING: INVALID ACTION (" + action + "/" + validMoves.length + ")");
+            action = validMoves.length - 1;
+        }
+
+        // [!] IF ACTION IS -1, ERROR
+        if (action === -1) {
+            console.log("ERROR: NO VALID MOVES");
+            console.log(game);
+            break;
+        }
+        
         let move = validMoves[action];
-        if (move.card === "SJ" || move.card === "HJ") {
+        
+        
+        // SJ or HJ
+        if (move.card === 10 || move.card === 49) {
             console.log("Turn " + game.turn + ": " + game.currentPlayer + " removes marker at (" + move.row + ", " + move.col + ") with " + move.card);
         } else {
             console.log("Turn " + game.turn + ": " + game.currentPlayer + " plays " + move.card + " at (" + move.row + ", " + move.col + ")");
