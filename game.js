@@ -207,10 +207,19 @@ function nextPlayer(game) {
  * @param {Number} row The row of the move.
  * @param {Number} col The column of the move.
  * @param {String} card The card played.
+ * @param {String} player The player making the move.
  * @returns {Boolean} True if the move is valid, false otherwise.
  */
-function isValidMove(game, row, col, card) {
+function isValidMove(game, row, col, card, player) {
     let isValid = false;
+    // Jack of Spades or Hearts can be used to remove a marker from the board
+    if (card === "SJ" || card === "HJ") {
+        let space = game.board[row][col];
+        if (space.player !== null && space.player !== player) {
+            isValid = true;
+        }
+    }
+
     // If corner, then any card can be played
     const validCorner = (row === 0 && col === 0) || (row === 0 && col === 9) || (row === 9 && col === 0) || (row === 9 && col === 9);
     let space = game.board[row][col];
@@ -235,14 +244,20 @@ function isValidMove(game, row, col, card) {
  * @returns {Object} The updated game state.
  */
 function playCard(game, row, col, card) {
-    if (isValidMove(game, row, col, card)) {
+    if (isValidMove(game, row, col, card, game.currentPlayer)) {
 
         const player = game.currentPlayer;
         const hand = game[player].hand;
         
         // Update board
         let space = game.board[row][col];
-        space.player = player;
+
+        // If Jack of Spades or Hearts, then remove marker from board
+        if (card === "SJ" || card === "HJ") {
+            space.player = null;
+        } else {
+            space.player = player;
+        }
         space.turn = game.turn;
         space.cardPlayed = card;
         
@@ -270,7 +285,7 @@ function getValidMoves(game) {
     for (let i = 0; i < hand.length; i++) {
         for (let j = 0; j < game.board.length; j++) {
             for (let k = 0; k < game.board[j].length; k++) {
-                if (isValidMove(game, j, k, hand[i])) {
+                if (isValidMove(game, j, k, hand[i], player)) {
                     validMoves.push({row: j, col: k, card: hand[i]});
                 }
             }
@@ -301,6 +316,9 @@ function drawGame(game) {
         }
         console.log(row);
     }
+    // draw key at bottom
+    console.log("\x1b[34m" + "Player 1" + "\x1b[0m" + " = Blue");
+    console.log("\x1b[31m" + "Player 2" + "\x1b[0m" + " = Red");
     console.log();
 }
 
@@ -312,7 +330,7 @@ async function mockGame() {
     while (game.winner === null) {
         await doMockTurn(game);
         // wait 1 second
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // await new Promise(resolve => setTimeout(resolve, 100));
         drawGame(game);
     }
 
@@ -328,7 +346,11 @@ async function doMockTurn(game) {
         // do random move
         let rand = Math.floor(Math.random() * validMoves.length);
         let move = validMoves[rand];
-        console.log("Turn " + game.turn + ": " + game.currentPlayer + " plays " + move.card + " at (" + move.row + ", " + move.col + ")");
+        if (move.card === "SJ" || move.card === "HJ") {
+            console.log("Turn " + game.turn + ": " + game.currentPlayer + " removes marker at (" + move.row + ", " + move.col + ") with " + move.card);
+        } else {
+            console.log("Turn " + game.turn + ": " + game.currentPlayer + " plays " + move.card + " at (" + move.row + ", " + move.col + ")");
+        }
         game = playCard(game, move.row, move.col, move.card);
         // draw card
         game = drawCard(game);
