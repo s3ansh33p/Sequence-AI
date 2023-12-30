@@ -4,7 +4,7 @@
  * @param {String} player The player to score.
  * @returns {Number} The score for the player.
  */
-function scoreBoard(game, player) {
+export function scoreBoard(game, player) {
     /*
         Logic:
         - Any sequence of 5-in-a-row/win is worth 100 points
@@ -71,6 +71,3 @@ function scoreSequence(sequence, player) {
     }
     return score;
 }
-
-// export
-module.exports = { scoreBoard };

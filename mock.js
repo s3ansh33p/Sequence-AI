@@ -1,6 +1,8 @@
 // imports
-const { initializeGame, dealCards, drawCard, playCard, nextPlayer, getValidMoves, drawGame } = require("./game.js");
-const { scoreBoard } = require("./score.js");
+
+// change to import
+import { initializeGame, dealCards, drawCard, playCard, nextPlayer, getValidMoves, drawGame } from "./game.js";
+import { scoreBoard } from "./score.js";
 
 // mock game
 async function mockGame() {

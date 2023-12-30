@@ -134,7 +134,7 @@ function checkForSequence(sequence) {
  * @description Creates new game state
  * @returns {Object} The new game state
  */
-function initializeGame() {
+export function initializeGame() {
     let game = {
         board: createBoard(),
         deck: shuffleDeck(),
@@ -158,7 +158,7 @@ function initializeGame() {
  * @param {Object} game The game state.
  * @returns {Object} The updated game state.
  */
-function dealCards(game) {
+export function dealCards(game) {
     for (let i = 0; i < 6; i++) {
         game.player1.hand.push(game.deck.pop());
         game.player2.hand.push(game.deck.pop());
@@ -171,7 +171,7 @@ function dealCards(game) {
  * @param {Object} game The game state.
  * @returns {Object} The updated game state.
  */
-function drawCard(game) {
+export function drawCard(game) {
     if (game.deck.length > 0) {
         let card = game.deck.pop();
         game[game.currentPlayer].hand.push(card);
@@ -184,7 +184,7 @@ function drawCard(game) {
  * @param {Object} game The game state.
  * @returns {Object} The updated game state.
  */
-function nextPlayer(game) {
+export function nextPlayer(game) {
     // get keys that start with player
     let keys = Object.keys(game);
     let players = [];
@@ -243,7 +243,7 @@ function isValidMove(game, row, col, card, player) {
  * @param {String} card The card played.
  * @returns {Object} The updated game state.
  */
-function playCard(game, row, col, card) {
+export function playCard(game, row, col, card) {
     if (isValidMove(game, row, col, card, game.currentPlayer)) {
 
         const player = game.currentPlayer;
@@ -278,7 +278,7 @@ function playCard(game, row, col, card) {
  * @param {Object} game The game state.
  * @returns {Array} An array of valid moves.
  */
-function getValidMoves(game) {
+export function getValidMoves(game) {
     let validMoves = [];
     const player = game.currentPlayer;
     const hand = game[player].hand;
@@ -298,7 +298,7 @@ function getValidMoves(game) {
  * @description Draws the game board to the console.
  * @param {Object} game The game state.
  */
-function drawGame(game) {
+export function drawGame(game) {
     let board = game.board;
     for (let i = 0; i < board.length; i++) {
         let row = "";
@@ -323,21 +323,4 @@ function drawGame(game) {
     console.log("\x1b[34m" + "Player 1" + "\x1b[0m" + " = Blue");
     console.log("\x1b[31m" + "Player 2" + "\x1b[0m" + " = Red");
     console.log();
-}
-
-// export functions
-module.exports = {
-    initializeGame,
-    dealCards,
-    drawCard,
-    nextPlayer,
-    playCard,
-    checkForWinner,
-    getValidMoves,
-    isValidMove,
-    createDeck,
-    shuffleDeck,
-    createBoard,
-    checkForSequence,
-    drawGame
 }
