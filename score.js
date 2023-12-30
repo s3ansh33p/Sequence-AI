@@ -7,7 +7,7 @@
 function scoreBoard(game, player) {
     /*
         Logic:
-        - Any sequence of 5-in-a-row is worth 100 points
+        - Any sequence of 5-in-a-row/win is worth 100 points
         - Any sequence of 4-in-a-row is worth 20 points
         - Any sequence of 3-in-a-row is worth 5 points
         - Any sequence of 2-in-a-row is worth 1 point
