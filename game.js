@@ -126,68 +126,95 @@ function createBoard() {
  * @param {Array} board The game board.
  * @returns {Number} The player that has won, or null if there is no winner.
  */
-function checkForWinner(board) {
+export function checkForWinner(board) {
     let winner = null;
     // Check for horizontal sequences
+    // console.log("========== [ HORIZONTAL ] ==========");
     for (let i = 0; i < board.length; i++) {
         let sequence = [];
         for (let j = 0; j < board[i].length; j++) {
             sequence.push(board[i][j].player);
         }
-        if (checkForSequence(sequence)) {
-            winner = sequence[0];
-        }
+        if (!winner) winner = checkForSequence(sequence);
     }
     // Check for vertical sequences
+    // console.log("========== [ VERTICAL ] ==========");
     for (let i = 0; i < board.length; i++) {
         let sequence = [];
         for (let j = 0; j < board[i].length; j++) {
             sequence.push(board[j][i].player);
         }
-        if (checkForSequence(sequence)) {
-            winner = sequence[0];
-        }
+        if (!winner) winner = checkForSequence(sequence);
     }
     // Check for diagonal sequences
-    let sequence = [];
-    for (let i = 0; i < board.length; i++) {
-        sequence.push(board[i][i].player);
+    // console.log("========== [ DIAGONAL ] ==========");
+    
+    // console.log("TOP LEFT PASS")
+    for (let i = 4; i < board.length; i++) {
+        let sequence = [];
+        for (let j = 0; j < i; j++) {
+            sequence.push(board[i-j][j].player);
+        }
+        if (!winner) winner = checkForSequence(sequence);
     }
-    if (checkForSequence(sequence)) {
-        winner = sequence[0];
+
+    // console.log("MIDDLE TO BOTTOM RIGHT PASS")
+    for (let i = 0; i < board.length - 4; i++) {
+        let sequence = [];
+        for (let j = 0; j < board.length - i; j++) {
+            sequence.push(board[i+j][j].player);
+        }
+        if (!winner) winner = checkForSequence(sequence);
     }
-    sequence = [];
-    for (let i = 0; i < board.length; i++) {
-        sequence.push(board[i][board.length - 1 - i].player);
+
+    // console.log("FLIPPED TOP RIGHT PASS")
+    for (let i = 4; i < board.length; i++) {
+        let sequence = [];
+        for (let j = 0; j < i; j++) {
+            sequence.push(board[j][i-j].player);
+        }
+        if (!winner) winner = checkForSequence(sequence);
     }
-    if (checkForSequence(sequence)) {
-        winner = sequence[0];
+
+    // console.log("FLIPPED MIDDLE TO BOTTOM LEFT PASS")
+    for (let i = 0; i < board.length - 4; i++) {
+        let sequence = [];
+        for (let j = 0; j < board.length - i; j++) {
+            sequence.push(board[j][i+j].player);
+        }
+        if (!winner) winner = checkForSequence(sequence);
     }
+
     return winner;
 }
 
 /**
  * @description Determines if there is a sequence of 5-in-a-row.
  * @param {Array} sequence The sequence to check.
- * @returns {Boolean} True if there is a sequence, false otherwise.
+ * @returns {Number} The player that has won, or null if there is no winner.
  */
-function checkForSequence(sequence) {
+export function checkForSequence(sequence) {
+    console.log("checkForSequence() - sequence: ", sequence);
     let isSequence = false;
+    // can be for either player, start with sequence[0] player
+    // when sequence[0] player is found, check next 4
+    // if all 5 are found, then isSequence = true
+    // if not, on next non match, set current search player to this
+    // until reached over halfway, at which point isSequence = false as impossible to have 5-in-a-row
     let player = sequence[0];
-    if (player !== null) {
-        let count = 0;
-        for (let i = 0; i < sequence.length; i++) {
-            if (sequence[i] === player) {
-                count++;
-            } else {
-                count = 0;
-            }
-            if (count === 5) {
-                isSequence = true;
-            }
+    let count = 0;
+    for (let i = 0; i < sequence.length; i++) {
+        if (sequence[i] === player) {
+            count++;
+        } else {
+            count = 1;
+            player = sequence[i];
+        }
+        if (count === 5) {
+            isSequence = true;
         }
     }
-    return isSequence;
+    return (isSequence ? player : null);
 }
 
 /**

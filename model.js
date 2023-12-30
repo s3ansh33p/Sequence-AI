@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs';
 import { initializeGame, dealCards, drawCard, playCard, nextPlayer, getValidMoves, drawGame } from "./game.js";
+import { scoreBoard } from "./score.js";
 
 const DEBUG = false;
 
@@ -250,6 +251,11 @@ async function playGame() {
             game = nextPlayer(game);
             // show game
             drawGame(game);
+            // score the board for both players
+            let p1Score = scoreBoard(game, 1);
+            let p2Score = scoreBoard(game, 2);
+            console.log("Player 1 Score: " + p1Score);
+            console.log("Player 2 Score: " + p2Score);
         }
         // check if winner  
         if (game.winner !== null) {
