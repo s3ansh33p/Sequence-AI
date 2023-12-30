@@ -18,6 +18,63 @@ const board = [
     ["B",  "DA", "DK", "DQ", "D10","D9", "D8", "D7", "D6", "B"]
 ]
 
+// value map from strings to numbers for model
+const valueMap = {
+    "B": 0,
+    "S2": 1,
+    "S3": 2,
+    "S4": 3,
+    "S5": 4,
+    "S6": 5,
+    "S7": 6,
+    "S8": 7,
+    "S9": 8,
+    "S10": 9,
+    "SJ": 10,
+    "SQ": 11,
+    "SK": 12,
+    "SA": 13,
+    "C2": 14,
+    "C3": 15,
+    "C4": 16,
+    "C5": 17,
+    "C6": 18,
+    "C7": 19,
+    "C8": 20,
+    "C9": 21,
+    "C10": 22,
+    "CJ": 23,
+    "CQ": 24,
+    "CK": 25,
+    "CA": 26,
+    "D2": 27,
+    "D3": 28,
+    "D4": 29,
+    "D5": 30,
+    "D6": 31,
+    "D7": 32,
+    "D8": 33,
+    "D9": 34,
+    "D10": 35,
+    "DJ": 36,
+    "DQ": 37,
+    "DK": 38,
+    "DA": 39,
+    "H2": 40,
+    "H3": 41,
+    "H4": 42,
+    "H5": 43,
+    "H6": 44,
+    "H7": 45,
+    "H8": 46,
+    "H9": 47,
+    "H10": 48,
+    "HJ": 49,
+    "HQ": 50,
+    "HK": 51,
+    "HA": 52
+};
+
 /**
  * @description This is the deck of cards for the game.
  */
@@ -27,8 +84,10 @@ function createDeck() {
     let cards = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
     for (let i = 0; i < suits.length; i++) {
         for (let j = 0; j < cards.length; j++) {
-            deck.push(suits[i] + cards[j]);
-            deck.push(suits[i] + cards[j]);
+            // deck.push(suits[i] + cards[j]);
+            // deck.push(suits[i] + cards[j]);
+            // use valueMap
+            deck.push(valueMap[suits[i] + cards[j]]);
         }
     }
     return deck;
@@ -55,7 +114,7 @@ function createBoard() {
     let gameBoard = board;
     for (let i = 0; i < gameBoard.length; i++) {
         for (let j = 0; j < gameBoard[i].length; j++) {
-            gameBoard[i][j] = {value: gameBoard[i][j], player: null, turn: null, cardPlayed: null};
+            gameBoard[i][j] = {value: valueMap[gameBoard[i][j]], player: null, turn: null, cardPlayed: null};
         }
     }
     return gameBoard;
@@ -140,11 +199,13 @@ export function initializeGame() {
         deck: shuffleDeck(),
         player1: {
             name: "Player 1",
-            hand: []
+            hand: [],
+            id: 1
         },
         player2: {
             name: "Player 2",
-            hand: []
+            hand: [],
+            id: 2
         },
         currentPlayer: null,
         winner: null,
@@ -244,9 +305,10 @@ function isValidMove(game, row, col, card, player) {
  * @returns {Object} The updated game state.
  */
 export function playCard(game, row, col, card) {
-    if (isValidMove(game, row, col, card, game.currentPlayer)) {
+    const player = game.currentPlayer;
+    const playerId = game[player].id;
+    if (isValidMove(game, row, col, card, playerId)) {
 
-        const player = game.currentPlayer;
         const hand = game[player].hand;
         
         // Update board
@@ -256,7 +318,7 @@ export function playCard(game, row, col, card) {
         if (card === "SJ" || card === "HJ") {
             space.player = null;
         } else {
-            space.player = player;
+            space.player = playerId;
         }
         space.turn = game.turn;
         space.cardPlayed = card;
@@ -305,14 +367,14 @@ export function drawGame(game) {
         for (let j = 0; j < board[i].length; j++) {
             let space = board[i][j];
             let color = "\x1b[0m";
-            if (space.player === "player1") {
+            if (space.player === 1) {
                 color = "\x1b[34m";
-            } else if (space.player === "player2") {
+            } else if (space.player === 2) {
                 color = "\x1b[31m";
             }
             let value = space.value;
-            // pad value with spaces (3 chars)
-            while (value.length < 3) {
+            // pad value with spaces
+            while (value.toString().length < 2) {
                 value = " " + value;
             }
             row += color + value + "\x1b[0m" + " ";

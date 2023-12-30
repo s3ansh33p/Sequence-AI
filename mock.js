@@ -14,12 +14,13 @@ async function mockGame() {
         // wait 1 second
         drawGame(game);
         // score the board for both players
-        let p1Score = scoreBoard(game, "player1");
-        let p2Score = scoreBoard(game, "player2");
+        let p1Score = scoreBoard(game, 1);
+        let p2Score = scoreBoard(game, 2);
         console.log("Player 1 Score: " + p1Score);
         console.log("Player 2 Score: " + p2Score);
         // await new Promise(resolve => setTimeout(resolve, 200));
     }
+    console.dir(game, {depth: null});
 
 }
 

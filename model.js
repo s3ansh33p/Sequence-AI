@@ -209,6 +209,8 @@ while (game.winner === null) {
         game = drawCard(game);
         // change player
         game = nextPlayer(game);
+        // show game
+        drawGame(game);
     }
     // check if winner  
     if (game.winner !== null) {
