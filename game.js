@@ -278,20 +278,21 @@ function isValidMove(game, row, col, card, player) {
     if (card === 10 || card === 49) {
         let space = game.board[row][col];
         if (space.player !== null && space.player !== player) {
+            // console.log("isValidMove(", row, col, card, player, ") - space: ", space);
             isValid = true;
         }
-    }
-
-    // If corner, then any card can be played
-    const validCorner = (row === 0 && col === 0) || (row === 0 && col === 9) || (row === 9 && col === 0) || (row === 9 && col === 9);
-    let space = game.board[row][col];
-    if (validCorner && space.player === null) {
-        isValid = true;
     } else {
-        // Jack of Clubs or Diamonds can be played on any space
-        if (space.player === null && (space.value === card || card === 23 || card === 36))
-        {
+        // If corner, then any card can be played
+        const validCorner = (row === 0 && col === 0) || (row === 0 && col === 9) || (row === 9 && col === 0) || (row === 9 && col === 9);
+        let space = game.board[row][col];
+        if (validCorner && space.player === null) {
             isValid = true;
+        } else {
+            // Jack of Clubs or Diamonds can be played on any space
+            if (space.player === null && (space.value === card || card === 23 || card === 36))
+            {
+                isValid = true;
+            }
         }
     }
     return isValid;
@@ -308,6 +309,7 @@ function isValidMove(game, row, col, card, player) {
 export function playCard(game, row, col, card) {
     const player = game.currentPlayer;
     const playerId = game[player].id;
+    // console.log("playCard() - card: ", card);
     if (isValidMove(game, row, col, card, playerId)) {
 
         const hand = game[player].hand;
@@ -316,7 +318,7 @@ export function playCard(game, row, col, card) {
         let space = game.board[row][col];
 
         // If Jack of Spades or Hearts, then remove marker from board
-        if (card === "SJ" || card === "HJ") {
+        if (card === 10 || card === 49) {
             space.player = null;
         } else {
             space.player = playerId;
@@ -325,6 +327,7 @@ export function playCard(game, row, col, card) {
         space.cardPlayed = card;
         
         // Remove card from player's hand
+        // console.log("playCard() - card2: ", card);
         hand.splice(hand.indexOf(card), 1);
 
         // Increase turn
@@ -344,11 +347,12 @@ export function playCard(game, row, col, card) {
 export function getValidMoves(game) {
     let validMoves = [];
     const player = game.currentPlayer;
+    const playerId = game[player].id;
     const hand = game[player].hand;
     for (let i = 0; i < hand.length; i++) {
         for (let j = 0; j < game.board.length; j++) {
             for (let k = 0; k < game.board[j].length; k++) {
-                if (isValidMove(game, j, k, hand[i], player)) {
+                if (isValidMove(game, j, k, hand[i], playerId)) {
                     validMoves.push({row: j, col: k, card: hand[i]});
                 }
             }

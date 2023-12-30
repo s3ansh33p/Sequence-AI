@@ -1,11 +1,15 @@
 import * as tf from '@tensorflow/tfjs';
 import { initializeGame, dealCards, drawCard, playCard, nextPlayer, getValidMoves, drawGame } from "./game.js";
 
+const DEBUG = false;
+
 // use CPU
 tf.setBackend('cpu');
 
+// UPDATE: POSSIBLE MOVES COULD BE CLOSE TO 600 DUE TO JACKS BEING WILDS
+
 // ACTION SPACE: (number from 0-35)
-// OBSERVATION SPACE: Array with [10][10][4] (board) + [36] (possible moves) + [1] (turn counter)
+// OBSERVATION SPACE: Array with [10][10][4] (board) + [600] (possible moves) + [1] (turn counter)
 // i.e [ [ [ [0, 0, 0, 0], [0, 0, 0, 0], ... ], ... ], [0, 0, 0, 0, ...], 0 ]
 // where [0, 0, 0, 0] is a space on the board with [player, turn, cardPlayed, value]
 
@@ -36,9 +40,11 @@ tf.setBackend('cpu');
 
 // [!] SKIPPING TURN COUNTER FOR NOW
 
+const outputSize = 600;
+
 // two input layers
 const input1 = tf.input({shape: [10, 10, 4]});
-const input2 = tf.input({shape: [36]});
+const input2 = tf.input({shape: [outputSize]}); // [!] THIS WILL NEED TO BE REVISED!!!
 
 // flatten inputs
 const flat1 = tf.layers.flatten().apply(input1);
@@ -50,7 +56,7 @@ const merged = tf.layers.concatenate().apply([flat1, input2]);
 const dense1 = tf.layers.dense({ units: 128, activation: 'relu' }).apply(merged);
 
 // output layer
-const output = tf.layers.dense({ units: 36, activation: 'softmax' }).apply(dense1);
+const output = tf.layers.dense({ units: outputSize, activation: 'softmax' }).apply(dense1);
 
 const model = tf.model({ inputs: [input1, input2], outputs: output });
 
@@ -108,6 +114,7 @@ function getObservation(game) {
     }
     // add valid moves
     let validMoves = getValidMoves(game);
+    if (DEBUG) console.log("getObservation() - validMoves: ", validMoves);
     for (let i = 0; i < validMoves.length; i++) {
         let move = validMoves[i];
         let index = move.row * 10 + move.col;
@@ -121,18 +128,19 @@ function getObservation(game) {
 
 function getObservationTensor(game) {
     let observation = getObservation(game);
+    if (DEBUG) console.log("getObservationTensor() - length: ", observation[0].length, observation[1].length);
     let tensor1 = tf.tensor3d(observation[0], [10, 10, 4]);
     
     // Add a batch dimension to tensor1
     tensor1 = tensor1.expandDims(0);
 
-    // Pad observation[1] with zeros if it has less than 36 elements
-    while (observation[1].length < 36) {
+    // Pad observation[1] with zeros if it has less than outputSize elements
+    while (observation[1].length < outputSize) {
         observation[1].push(0);
     }
 
-    let tensor2 = tf.tensor2d(observation[1], [1, 36]);
-    // console.log(tensor1.shape, tensor2.shape);
+    let tensor2 = tf.tensor2d(observation[1], [1, outputSize]);
+    if (DEBUG) console.log("getObservationTensor() - tensor: ", tensor1.shape, tensor2.shape);
 
     return [tensor1, tensor2];
 }
@@ -148,7 +156,9 @@ function getRewardTensor(reward) {
 }
 
 function getPrediction(game) {
+    if (DEBUG) console.log("getPrediction()");
     let observation = getObservationTensor(game);
+    if (DEBUG) console.log("getPrediction() - tensor: ", observation[0].shape, observation[1].shape);
     let prediction = model.predict(observation);
     return prediction;
 }
@@ -159,10 +169,21 @@ function getActionFromPrediction(prediction) {
 }
 
 async function trainModel(game, action, reward) {
+    if (DEBUG) console.log("trainModel()");
     let observation = getObservationTensor(game);
-    let actionTensor = getActionTensor(action);
+    if (DEBUG) console.log("trainModel() - tensor: ", observation[0].shape, observation[1].shape);
     let rewardTensor = getRewardTensor(reward);
-    await model.fit([observation, actionTensor], rewardTensor, {epochs: 1});
+    if (DEBUG) console.log("trainModel() - before fit");
+    // Create a one-hot encoded tensor for the action taken
+    if (DEBUG) console.log(typeof action, action);
+
+    let actionTensor = tf.oneHot(tf.tensor1d(action, 'int32'), outputSize);
+
+    // Apply the reward to the action taken
+    let targetTensor = actionTensor.mul(rewardTensor);
+
+    await model.fit(observation, targetTensor, {epochs: 1});
+    if (DEBUG) console.log("trainModel() - after fit");
 }
 
 // on each move, train model
@@ -189,10 +210,10 @@ async function playGame() {
     while (game.winner === null) {
         // get prediction
         let prediction = getPrediction(game);
-        // console.log(prediction);
+        // if (DEBUG) console.log(prediction);
         // get action
         let action = getActionFromPrediction(prediction);
-        // console.log(action);
+        // if (DEBUG) console.log(action);
         // if no valid moves, then game ends in tie
         if (action === -1) {
             game.winner = "Tie";
