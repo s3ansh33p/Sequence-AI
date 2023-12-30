@@ -275,7 +275,7 @@ export function nextPlayer(game) {
 function isValidMove(game, row, col, card, player) {
     let isValid = false;
     // Jack of Spades or Hearts can be used to remove a marker from the board
-    if (card === "SJ" || card === "HJ") {
+    if (card === 10 || card === 49) {
         let space = game.board[row][col];
         if (space.player !== null && space.player !== player) {
             isValid = true;
@@ -289,7 +289,7 @@ function isValidMove(game, row, col, card, player) {
         isValid = true;
     } else {
         // Jack of Clubs or Diamonds can be played on any space
-        if (space.player === null && (space.value === card || card === "CJ" || card === "DJ"))
+        if (space.player === null && (space.value === card || card === 23 || card === 36))
         {
             isValid = true;
         }

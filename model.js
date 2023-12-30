@@ -158,15 +158,15 @@ function getActionFromPrediction(prediction) {
     return action;
 }
 
-function trainModel(game, action, reward) {
+async function trainModel(game, action, reward) {
     let observation = getObservationTensor(game);
     let actionTensor = getActionTensor(action);
     let rewardTensor = getRewardTensor(reward);
-    model.fit([observation, actionTensor], rewardTensor, {epochs: 1});
+    await model.fit([observation, actionTensor], rewardTensor, {epochs: 1});
 }
 
 // on each move, train model
-function trainGame(game) {
+async function trainGame(game) {
     // get prediction
     let prediction = getPrediction(game);
     // get action
@@ -174,68 +174,71 @@ function trainGame(game) {
     // get reward
     let reward = getReward(game);
     // train model
-    trainModel(game, action, reward);
+    await trainModel(game, action, reward);
 }
 
 // ========== [ TRAINING END ] ==========
 
 // ========== [ PLAYING START ] ==========
 
-// mock game
-let game = initializeGame();
-game = dealCards(game);
-game.currentPlayer = "player1";
-while (game.winner === null) {
-    // get prediction
-    let prediction = getPrediction(game);
-    // console.log(prediction);
-    // get action
-    let action = getActionFromPrediction(prediction);
-    // console.log(action);
-    // if no valid moves, then game ends in tie
-    if (action === -1) {
-        game.winner = "Tie";
-    } else {
-        // do move
-        let validMoves = getValidMoves(game);
-        
-        // [!] THIS WILL NEED TO BE REVISED!!!
-        if (action >= validMoves.length) {
-            console.log("WARNING: INVALID ACTION (" + action + "/" + validMoves.length + ")");
-            action = validMoves.length - 1;
-        }
-
-        // [!] IF ACTION IS -1, ERROR
+async function playGame() {
+    // mock game
+    let game = initializeGame();
+    game = dealCards(game);
+    game.currentPlayer = "player1";
+    while (game.winner === null) {
+        // get prediction
+        let prediction = getPrediction(game);
+        // console.log(prediction);
+        // get action
+        let action = getActionFromPrediction(prediction);
+        // console.log(action);
+        // if no valid moves, then game ends in tie
         if (action === -1) {
-            console.log("ERROR: NO VALID MOVES");
-            console.log(game);
-            break;
-        }
-        
-        let move = validMoves[action];
-        
-        
-        // SJ or HJ
-        if (move.card === 10 || move.card === 49) {
-            console.log("Turn " + game.turn + ": " + game.currentPlayer + " removes marker at (" + move.row + ", " + move.col + ") with " + move.card);
+            game.winner = "Tie";
         } else {
-            console.log("Turn " + game.turn + ": " + game.currentPlayer + " plays " + move.card + " at (" + move.row + ", " + move.col + ")");
+            // do move
+            let validMoves = getValidMoves(game);
+            
+            // [!] THIS WILL NEED TO BE REVISED!!!
+            if (action >= validMoves.length) {
+                console.log("WARNING: INVALID ACTION (" + action + "/" + validMoves.length + ")");
+                action = validMoves.length - 1;
+            }
+
+            // [!] IF ACTION IS -1, ERROR
+            if (action === -1) {
+                console.log("ERROR: NO VALID MOVES");
+                console.log(game);
+                break;
+            }
+            
+            let move = validMoves[action];
+            
+            
+            // SJ or HJ
+            if (move.card === 10 || move.card === 49) {
+                console.log("Turn " + game.turn + ": " + game.currentPlayer + " removes marker at (" + move.row + ", " + move.col + ") with " + move.card);
+            } else {
+                console.log("Turn " + game.turn + ": " + game.currentPlayer + " plays " + move.card + " at (" + move.row + ", " + move.col + ")");
+            }
+            game = playCard(game, move.row, move.col, move.card);
+            // draw card
+            game = drawCard(game);
+            // change player
+            game = nextPlayer(game);
+            // show game
+            drawGame(game);
         }
-        game = playCard(game, move.row, move.col, move.card);
-        // draw card
-        game = drawCard(game);
-        // change player
-        game = nextPlayer(game);
-        // show game
-        drawGame(game);
+        // check if winner  
+        if (game.winner !== null) {
+            console.log(game.winner + " wins!");
+        }
+        // train model
+        await trainGame(game);
     }
-    // check if winner  
-    if (game.winner !== null) {
-        console.log(game.winner + " wins!");
-    }
-    // train model
-    trainGame(game);
 }
 
 // ========== [ PLAYING END ] ==========
 
+playGame();
