@@ -194,7 +194,7 @@ export function checkForWinner(board) {
  * @returns {Number} The player that has won, or null if there is no winner.
  */
 export function checkForSequence(sequence) {
-    console.log("checkForSequence() - sequence: ", sequence);
+    // console.log("checkForSequence() - sequence: ", sequence);
     let isSequence = false;
     // can be for either player, start with sequence[0] player
     // when sequence[0] player is found, check next 4
@@ -210,7 +210,7 @@ export function checkForSequence(sequence) {
             count = 1;
             player = sequence[i];
         }
-        if (count === 5) {
+        if (count === 5 && player !== null) {
             isSequence = true;
         }
     }

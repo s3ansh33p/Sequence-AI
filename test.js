@@ -131,4 +131,5 @@ drawGame({ board: testBoard, player1: { hand: [] }, player2: { hand: [] } })
 const winner = checkForWinner(testBoard);
 console.log(winner);
 
-// console.log(checkForSequence([1,2,1,2,2,2,2,2]))
+console.log(checkForSequence([1,2,1,2,2,2,2,2]))
+console.log(checkForSequence([2,null,null,null,null,null,null,1]))
