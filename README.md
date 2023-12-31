@@ -23,5 +23,3 @@ node mock.js # runs a mock game with random moves
 node model.js # AI WIP
 node test.js # some tests around win logic
 ```
-
-Note: score.js has incorrect logic, and will need to be updated in-line with game.js#L129-L218
